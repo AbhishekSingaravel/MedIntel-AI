@@ -21,6 +21,11 @@ class Settings(BaseSettings):
     db_user: str
     db_password: str
 
+    #JWT
+    jwt_secret_key: str
+    jwt_algorithm: str
+    jwt_access_token_expire_minutes: int
+
     # OpenAI
     openai_api_key: str = ""
     openai_model: str
