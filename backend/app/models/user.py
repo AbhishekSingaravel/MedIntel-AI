@@ -3,6 +3,9 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import BaseModel
 
+from sqlalchemy import Enum
+
+from app.models.enums import UserRole
 
 class User(BaseModel):
     __tablename__ = "users"
@@ -24,6 +27,12 @@ class User(BaseModel):
         nullable=False,
     )
 
+    role: Mapped[UserRole] = mapped_column (
+        Enum(UserRole),
+        nullable=False,
+        default=UserRole.USER,
+    )
+    
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,

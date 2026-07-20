@@ -10,12 +10,22 @@ from app.api.security import router as security_router
 
 from app.api.users import router as users_router
 
+from app.handlers.exception_handlers import register_exception_handlers
+
+from app.core.logging_config import configure_logging
+
+configure_logging()
+
 app = FastAPI(
     title="MedIntel AI",
     description="AI-Powered Clinical Document Intelligence Platform",
     version="1.0.0",
 )
 
+# Register exception handlers
+register_exception_handlers(app)
+
+# Register routers
 app.include_router(health_router, prefix="/api/v1")
 app.include_router(config_router, prefix="/api/v1")
 app.include_router(database_router, prefix="/api/v1")
