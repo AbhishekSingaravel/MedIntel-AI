@@ -7,6 +7,10 @@ from sqlalchemy import Enum
 
 from app.models.enums import UserRole
 
+from sqlalchemy.orm import relationship
+
+
+
 class User(BaseModel):
     __tablename__ = "users"
 
@@ -37,4 +41,10 @@ class User(BaseModel):
         Boolean,
         default=True,
         nullable=False,
+    )
+    
+    documents = relationship(
+        "Document",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
