@@ -6,12 +6,10 @@ from sqlalchemy import (
     Integer,
     String,
 )
-from sqlalchemy.orm import relationship, Mapped
+from sqlalchemy.orm import relationship
 
 from app.models.base import BaseModel
 from app.models.enums import DocumentStatus
-
-
 
 
 class Document(BaseModel):
@@ -55,4 +53,10 @@ class Document(BaseModel):
     user = relationship(
         "User",
         back_populates="documents",
+    )
+
+    chunks = relationship(
+        "DocumentChunk",
+        back_populates="document",
+        cascade="all, delete-orphan",
     )

@@ -15,7 +15,7 @@ from app.services.document_service import DocumentService
 
 from typing import List
 from fastapi.responses import FileResponse
-from fastapi import Response
+from fastapi import Response, BackgroundTasks
 
 router = APIRouter(
     prefix="/documents",
@@ -29,15 +29,21 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
 )
 async def upload_document(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     service = DocumentService(db)
-
+    
     document = service.upload_document(
         file=file,
         user_id=current_user.id,
+    )
+
+    background_tasks.add_task(
+        service.process_document,
+        document.id,
     )
 
     return document
@@ -112,3 +118,4 @@ def delete_document(
     return Response(
         status_code=status.HTTP_204_NO_CONTENT
     )
+

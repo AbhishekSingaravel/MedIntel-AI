@@ -12,6 +12,10 @@ from app.exceptions.user_exceptions import (
     UserNotFoundException,
 )
 
+from app.exceptions.chat_exceptions import (
+    ChatSessionNotFoundException,
+)
+
 def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(EmailAlreadyExistsException)
     async def email_exists_handler(
@@ -73,3 +77,14 @@ def register_exception_handlers(app: FastAPI) -> None:
             },
         )
 
+    @app.exception_handler(ChatSessionNotFoundException)
+    async def chat_session_not_found_handler(
+        request: Request,
+        exc: ChatSessionNotFoundException,
+    ):
+        return JSONResponse(
+            status_code=404,
+            content={
+                "detail": str(exc),
+            },
+        )

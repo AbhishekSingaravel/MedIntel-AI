@@ -16,6 +16,10 @@ from app.core.logging_config import configure_logging
 
 from app.api.document import router as document_router
 
+from app.api.routes import retrieval
+
+from app.api import chat
+
 configure_logging()
 
 app = FastAPI(
@@ -34,6 +38,8 @@ app.include_router(database_router, prefix="/api/v1")
 app.include_router(security_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
 app.include_router(document_router, prefix="/api/v1")
+app.include_router(retrieval.router,prefix="/api/v1")
+app.include_router(chat.router, prefix="/api/v1")
 
 @app.get("/", tags=["Root"])
 def root():

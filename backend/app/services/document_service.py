@@ -12,6 +12,21 @@ from app.repositories.document_repository import DocumentRepository
 from fastapi import HTTPException, status
 from pathlib import Path
 
+from app.ai.extractor import PDFExtractor
+
+from app.ai.cleaner import TextCleaner
+
+from app.ai.chunker import TextChunker
+
+from app.ai.models import embedding_generator
+
+from app.repositories.document_chunk import DocumentChunkRepository
+
+import logging
+import time
+
+logger = logging.getLogger(__name__)
+
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 ALLOWED_CONTENT_TYPES = {
@@ -48,7 +63,9 @@ class FileStorageService:
 class DocumentService:
 
     def __init__(self, db: Session):
+        self.db = db
         self.repository = DocumentRepository(db)
+        self.chunk_repository = DocumentChunkRepository(db)
         self.storage = FileStorageService()
 
     def upload_document(
@@ -174,3 +191,104 @@ class DocumentService:
             )
 
         return file_size
+    
+    def process_document(
+        self,
+        document_id: int,
+    ) -> None:
+        """
+        Process uploaded document:
+        Extract -> Clean -> Chunk -> Generate Embeddings -> Save -> Mark Processed
+        """
+
+        document = self.repository.get_by_id(document_id)
+
+        if document is None:
+            return
+
+        logger.info(
+            "Started processing document %s",
+            document_id,
+        )
+
+        document.status = DocumentStatus.PROCESSING
+        self.repository.update(document)
+
+        extractor = PDFExtractor()
+
+        # First extraction (for logging)
+        text = extractor.extract_text(
+            document.file_path
+        )
+
+        logger.info(
+            "Extracted %d characters from document %s",
+            len(text),
+            document.id,
+        )
+
+        # Second extraction (kept as requested)
+        raw_text = extractor.extract_text(
+            document.file_path
+        )
+
+        logger.info(
+            "Extracted %d characters",
+            len(raw_text),
+        )
+
+        cleaner = TextCleaner()
+
+        clean_text = cleaner.clean(
+            raw_text
+        )
+
+        logger.info(
+            "Cleaned text contains %d characters",
+            len(clean_text),
+        )
+
+        chunker = TextChunker()
+
+        chunks = chunker.chunk(
+            clean_text
+        )
+
+        logger.info(
+            "Created %d chunks",
+            len(chunks),
+        )
+
+        embeddings = embedding_generator.generate(
+            chunks
+        )
+
+        logger.info(
+            "Generated %d embeddings",
+            len(embeddings),
+        )
+
+        for index, (chunk, embedding) in enumerate(
+            zip(chunks, embeddings)
+        ):
+            self.chunk_repository.create(
+                document_id=document.id,
+                chunk_index=index,
+                chunk_text=chunk,
+                embedding=embedding,
+            )
+
+        self.db.commit()
+
+        logger.info(
+            "Saved %d chunks to database",
+            len(chunks),
+        )
+
+        document.status = DocumentStatus.PROCESSED
+        self.repository.update(document)
+
+        logger.info(
+            "Completed processing document %s",
+            document_id,
+        )
