@@ -32,7 +32,11 @@ class ChatService:
         self,
         request: ChatRequest,
     ) -> ChatResponse:
-
+        print("================================")
+        print("Question    :", request.question)
+        print("Document ID :", request.document_id)
+        print("Session ID  :", request.session_id)
+        print("================================")
         if request.session_id is None:
 
             session = self.chat_session_repository.create(
@@ -56,9 +60,10 @@ class ChatService:
             role=ChatRole.USER,
             message=request.question,
         )
-
+        print(f"Received document ID: {request.document_id}")
         retrieved_chunks = self.retriever.retrieve(
             query=request.question,
+            document_id=request.document_id,
         )
 
         context = self.context_builder.build(

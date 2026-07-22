@@ -19,6 +19,7 @@ from app.api.document import router as document_router
 from app.api.routes import retrieval
 
 from app.api import chat
+from fastapi.middleware.cors import CORSMiddleware
 
 configure_logging()
 
@@ -26,6 +27,16 @@ app = FastAPI(
     title="MedIntel AI",
     description="AI-Powered Clinical Document Intelligence Platform",
     version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Register exception handlers

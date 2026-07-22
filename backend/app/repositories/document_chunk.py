@@ -31,8 +31,11 @@ class DocumentChunkRepository:
     def search_similar(
         self,
         embedding: list[float],
+        document_id: int | None = None,
         limit: int = 5,
     ) -> list[tuple[DocumentChunk, float]]:
+        
+        print(f"Searching only in document {document_id}")
 
         distance = (
             DocumentChunk.embedding
@@ -45,6 +48,15 @@ class DocumentChunkRepository:
                 DocumentChunk,
                 distance,
             )
+        )
+
+        if document_id is not None:
+            statement = statement.where(
+                DocumentChunk.document_id == document_id
+            )
+
+        statement = (
+            statement
             .order_by(distance)
             .limit(limit)
         )

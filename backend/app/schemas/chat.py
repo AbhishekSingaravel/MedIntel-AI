@@ -9,6 +9,7 @@ class ChatRequest(BaseModel):
     question: str
     provider: str
     model: str
+    document_id: Optional[int] = None
 
 
 class ChatResponse(BaseModel):
