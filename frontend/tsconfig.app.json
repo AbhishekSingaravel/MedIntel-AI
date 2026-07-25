@@ -8,6 +8,8 @@
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
 
+    "ignoreDeprecations": "6.0",
+
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
@@ -24,6 +26,5 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
-  },
-  "include": ["src"]
+  }
 }
