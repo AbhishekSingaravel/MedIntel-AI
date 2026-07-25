@@ -232,7 +232,7 @@ function Documents() {
         open={viewerOpen}
         document={selectedDocument}
         onClose={() => setViewerOpen(false)}
-        onDownload={handleDownload}
+        // onDownload={handleDownload}
       />
 
     </div>

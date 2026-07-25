@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { FaChevronRight } from "react-icons/fa";
 
 interface Props {
