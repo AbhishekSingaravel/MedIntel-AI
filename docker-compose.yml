@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: medintel-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: medintel_ai
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    container_name: medintel-backend
+
+    restart: unless-stopped
+
+    depends_on:
+      - postgres
+
+    env_file:
+      - ./backend/.env
+
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
+    container_name: medintel-frontend
+
+    restart: unless-stopped
+
+    depends_on:
+      - backend
+
+    ports:
+      - "4173:4173"
+
+volumes:
+  postgres_data:
